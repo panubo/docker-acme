@@ -10,6 +10,12 @@ ACCOUNT_KEY="$CONF/le_account.key"
 
 [ ! -d "$CONF" ] && echo "Conf dir does not exist" && exit 128
 
+# Either --all or <domain1> <domain2>
+if [ "$1" == "--all" ]; then
+    DOMAINS=$(find $CONF -name '*.csr' -exec basename {} .csr \;)
+else
+    DOMAINS=$@
+fi
 
 if [ ! -f "$ACCOUNT_KEY" ]; then
     echo ">> Generating Lets Encrypt Account Key"
@@ -17,7 +23,7 @@ if [ ! -f "$ACCOUNT_KEY" ]; then
     chmod 600 $ACCOUNT_KEY
 fi
 
-for DOMAIN in $@; do
+for DOMAIN in $DOMAINS; do
     
     DOMAIN_CRT="$CONF/${DOMAIN}.crt"
     DOMAIN_KEY="$CONF/${DOMAIN}.key"
