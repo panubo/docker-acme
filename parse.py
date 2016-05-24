@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# This is not used anymore. To use it the following are required
+# $ apk add py-six py-openssl py-cryptography py-enum34 py-cffi
+
 import sys
 import OpenSSL.crypto
 from OpenSSL.crypto import load_certificate_request, FILETYPE_PEM
