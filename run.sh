@@ -7,6 +7,7 @@ set -e
 CONF='/etc/letsencrypt'
 ACME_CHALLENGES='/var/www/challenges'
 ACCOUNT_KEY="$CONF/le_account.key"
+CA_FILE="$CONF/lets-encrypt-x3-cross-signed.pem"
 
 [ ! -d "$CONF" ] && echo "Conf dir does not exist" && exit 128
 
@@ -23,17 +24,17 @@ if [ ! -f "$ACCOUNT_KEY" ]; then
     chmod 600 $ACCOUNT_KEY
 fi
 
+if [ ! -f "$CA_FILE" ]; then
+    echo ">> Downloading CA File"
+    curl -L 'https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem' -o $CA_FILE
+fi
+
 for DOMAIN in $DOMAINS; do
     
     DOMAIN_CRT="$CONF/${DOMAIN}.crt"
     DOMAIN_KEY="$CONF/${DOMAIN}.key"
     DOMAIN_CSR="$CONF/${DOMAIN}.csr"
     DOMAIN_PEM="$CONF/${DOMAIN}.pem"
-    CA_FILE="$CONF/lets-encrypt-x3-cross-signed.pem"
-
-    if [ ! -f "$CA_FILE" ]; then
-        curl -L 'https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem' -o $CA_FILE
-    fi
 
     if [ ! -f "$DOMAIN_KEY" ]; then
         echo ">> Generating Key for $DOMAIN"
