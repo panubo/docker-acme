@@ -36,7 +36,7 @@ function create_csr() {
     SAN=$(echo $SAN| tr ' ' ,)
 
     if [ ! -f "$DOMAIN_KEY" ]; then
-        echo ">> Generating Key for $DOMAIN"
+        echo ">> Generating Key for $PRIMARY_DOMAIN"
         openssl genrsa 2048 > $DOMAIN_KEY
         chmod 600 $DOMAIN_KEY
     fi
