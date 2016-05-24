@@ -15,7 +15,7 @@ CA_FILE="$CONF/lets-encrypt-x3-cross-signed.pem"
 if [ ! -f "$ACCOUNT_KEY" ]; then
     echo ">> Generating Lets Encrypt Account Key"
     openssl genrsa 4096 > $ACCOUNT_KEY
-    chmod 600 $ACCOUNT_KEY
+    chmod 400 $ACCOUNT_KEY
 fi
 
 if [ ! -f "$CA_FILE" ]; then
