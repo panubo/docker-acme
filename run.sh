@@ -23,16 +23,17 @@ if [ ! -f "$CA_FILE" ]; then
     curl -L 'https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem' -o $CA_FILE
 fi
 
-function process_domain() {
+function create_csr() {
     PRIMARY_DOMAIN=$1
-    for D in $@; do
-        SAN="${SAN}DNS:${D} "
-    done
-    SAN=$(echo $SAN| tr ' ' ,)
     DOMAIN_CRT="$CONF/${PRIMARY_DOMAIN}.crt"
     DOMAIN_KEY="$CONF/${PRIMARY_DOMAIN}.key"
     DOMAIN_CSR="$CONF/${PRIMARY_DOMAIN}.csr"
     DOMAIN_PEM="$CONF/${PRIMARY_DOMAIN}.pem"
+
+    for D in $@; do
+        SAN="${SAN}DNS:${D} "
+    done
+    SAN=$(echo $SAN| tr ' ' ,)
 
     if [ ! -f "$DOMAIN_KEY" ]; then
         echo ">> Generating Key for $DOMAIN"
@@ -45,6 +46,16 @@ function process_domain() {
         openssl req -new -sha256 -key $DOMAIN_KEY -subj "/" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=$SAN")) > $DOMAIN_CSR
     fi
 
+    get_cert $PRIMARY_DOMAIN
+}
+
+function get_cert() {
+    PRIMARY_DOMAIN=$1
+    DOMAIN_CRT="$CONF/${PRIMARY_DOMAIN}.crt"
+    DOMAIN_KEY="$CONF/${PRIMARY_DOMAIN}.key"
+    DOMAIN_CSR="$CONF/${PRIMARY_DOMAIN}.csr"
+    DOMAIN_PEM="$CONF/${PRIMARY_DOMAIN}.pem"
+
     echo ">> Running ACME for $PRIMARY_DOMAIN"
     python /acme_tiny.py --account-key $ACCOUNT_KEY --csr $DOMAIN_CSR --acme-dir $ACME_CHALLENGES > $DOMAIN_CRT
 
@@ -55,14 +66,13 @@ function process_domain() {
 
 # Either --renew or --issue <domain1> <domain2>
 if [ "$1" == "--renew" ]; then
-    CSRS=$(find $CONF -name '*.csr')
-    for CSR in $CSRS; do
-        DOMAINS=$(/parse.py $CSR)
-        process_domain $DOMAINS
+    DOMAINS=$(find $CONF -name '*.csr' -exec basename {} .csr \;)
+    for DOMAIN in $DOMAINS; do
+        get_cert $DOMAIN
     done
 elif [ "$1" == "--issue" ]; then
     shift;
-    process_domain $@
+    create_csr $@
 else
     echo "Usage Error!"
     echo "Usage: run.sh --renew | --issue <domain1> <domain2>"
