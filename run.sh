@@ -57,7 +57,8 @@ function get_cert() {
     DOMAIN_PEM="$CONF/${PRIMARY_DOMAIN}.pem"
 
     echo ">> Running ACME for $PRIMARY_DOMAIN"
-    python /acme_tiny.py --account-key $ACCOUNT_KEY --csr $DOMAIN_CSR --acme-dir $ACME_CHALLENGES > $DOMAIN_CRT
+    CRT=$(python /acme_tiny.py --account-key $ACCOUNT_KEY --csr $DOMAIN_CSR --acme-dir $ACME_CHALLENGES)
+    [ "$?" -eq "0"] && echo $CRT > $DOMAIN_CRT
 
     echo ">> Generating concatenated PEM"
     touch $DOMAIN_PEM && chmod 600 $DOMAIN_PEM
