@@ -20,7 +20,7 @@ fi
 
 if [ ! -f "$CA_FILE" ]; then
     echo ">> Downloading CA File"
-    curl -L 'https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem' -o $CA_FILE
+    curl -s -L 'https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem' -o $CA_FILE
 fi
 
 function create_csr() {
@@ -75,7 +75,7 @@ elif [ "$1" == "--issue" ]; then
     shift;
     create_csr $@
 else
-    echo "Usage Error!"
+    echo "Usage Error! See usage for correct arguments."
     echo "Usage: run.sh --renew | --issue <domain1> <domain2>"
     exit 128
 fi
